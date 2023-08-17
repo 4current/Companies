@@ -1,0 +1,22 @@
+---
+title: "Amazon Analysis"
+output: html_notebook
+---
+
+From https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statement
+
+```{r}
+year <- c(2018, 2019, 2020, 2021, 2022)
+sales <- c(232887, 280522, 386064, 469822, 513983)
+sales <- signif(sales/1000, digits = 3)
+begin_sales <- sales[1:length(sales)-1]
+names(sales) <- year
+growth <- growth
+percent_growth <- signif(growth / begin_sales, digits = 3)
+agr <- mean(percent_growth)
+
+print(percent_growth)
+barplot(sales)
+barplot(growth)
+print(agr)
+```
