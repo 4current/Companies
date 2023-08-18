@@ -7,16 +7,30 @@ From https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statem
 
 ```{r}
 year <- c(2018, 2019, 2020, 2021, 2022)
-sales <- c(232887, 280522, 386064, 469822, 513983)
-sales <- signif(sales/1000, digits = 3)
-begin_sales <- sales[1:length(sales)-1]
-names(sales) <- year
-growth <- growth
-percent_growth <- signif(growth / begin_sales, digits = 3)
-agr <- mean(percent_growth)
+revenue <- c(232887, 280522, 386064, 469822, 513983)
+n_rows <- length(revenue)
+revenue_data <- data.frame(year,revenue)
 
-print(percent_growth)
-barplot(sales)
-barplot(growth)
-print(agr)
+growth <- diff(revenue_data$revenue)
+revenue_data$growth <- NA
+revenue_data$growth[2:n_rows] <- growth
+
+growth_rate <- growth / revenue_data$revenue[1:n_rows-1]
+revenue_data$growth_rate <- NA
+revenue_data$growth_rate[2:n_rows] <- growth_rate
+
+plot_matrix <- cbind(revenue_data$revenue, revenue_data$growth)
+row.names(plot_matrix) <- revenue_data$year
+
+print(plot_matrix)
+#begin_sales <- sales[1:length(sales)-1]
+#names(sales) <- year
+#growth <- growth
+#agr <- mean(percent_growth)
+
+#print(percent_growth)
+
+barplot(plot_matrix, beside = TRUE, names.arg = revenue_data$year)
+#barplot(growth)
+#print(agr)
 ```
