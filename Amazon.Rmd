@@ -8,7 +8,7 @@ output:
 
 From https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statement
 
-Analyze revenue growth
+## Analyze revenue growth - Top Line
 ```{r}
 year <- c(2018, 2019, 2020, 2021, 2022)
 revenue <- c(232887, 280522, 386064, 469822, 513983)
@@ -16,6 +16,7 @@ revenue <- c(232887, 280522, 386064, 469822, 513983)
 plot_height <- signif(revenue/1000, digits = 3)
 barplot(plot_height, names.arg = year, main = 'Amazon.com Sales/Revenue', xlab = 'Year', ylab = "Billion Dollars")
 ```
+# Revenue Growth
 
 ```{r}
 r <- length(year)
@@ -31,6 +32,8 @@ revenue_data$growth_rate[2:r] <- revenue_data$growth[2:r] / revenue_data$revenue
 print(signif(revenue_data, digits = 3))
 
 ```
+
+## Operating Expenses
 
 In this section we calculate the net operating profit (NOP) and neta operating profit margin (NOPM).
 The formula is:
@@ -50,7 +53,7 @@ rownames(nopm_data) <- year
 print(signif(nopm_data, digits = 3))
 
 ```
-
+## Averages Growth and NOPM
 ```{r}
 library("COINr")
 periods <- 3
@@ -68,6 +71,8 @@ print(paste(periods,"Year Average Net Operating Profit Margin", signif(anopm, di
 ```
 So not let's look at the company's projected NOP given an excess return period (ERP) of 7 years
 
+## Excess Return Period
+
 ```{r}
 ERP <- 7
 future_revenue <- cumprod(c(revenue[5], rep((1+cagr), ERP)))
@@ -77,3 +82,31 @@ colnames(future_nopm_data) <- c('revenue', 'nop')
 rownames(future_nopm_data) <- seq(year[length(year)] + 1, length.out = ERP)
 print(signif(future_nopm_data, digits = 3))
 ```
+
+## Taxes
+Figure out an average tax rate fom historical data. Depreciation and Amortization are factored in later.
+Ity seems in some cases there is negative adjustments so lelt's exclude that for tha average.
+
+```{r}
+income_before_tax <-c(11261, 13976, 24178, 38151, -5936)
+income_taxes <- c(1197, 2374, 2863, 4791, -3217)
+tax_rate <- income_taxes / income_before_tax
+tax_table <- data.frame(income_before_tax, income_taxes, tax_rate)
+row.names(tax_table) <- year
+print(tax_table)
+```
+```{r}
+unadjusted_tax_rate <- mean(tax_rate[2:4])
+print(paste("Average Unadjusted Tax Rate: ", unadjusted_tax_rate ))
+```
+
+## NOPAT Table
+
+```{r}
+# for now ... unadjusted
+tax_rate <- unadjusted_tax_rate
+print(tax_rate)
+nopat_table <- data.frame('nop' = future_nopm_data$nop, 'nopat' = future_nopm_data$nop * (1 - tax_rate))
+print(nopat_table)
+```
+
