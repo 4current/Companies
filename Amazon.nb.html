@@ -1770,7 +1770,7 @@ barplot(plot_height, names.arg = year, main = &#39;Amazon.com Sales/Revenue&#39;
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuciA8LSBsZW5ndGgoeWVhcilcbnJldmVudWVfZGF0YSA8LSBkYXRhLmZyYW1lKHJldmVudWUpXG5yb3duYW1lcyhyZXZlbnVlX2RhdGEpIDwtIHllYXJcblxucmV2ZW51ZV9kYXRhJGdyb3d0aCA8LSBOQVxucmV2ZW51ZV9kYXRhJGdyb3d0aFsyOnJdIDwtIGRpZmYocmV2ZW51ZV9kYXRhJHJldmVudWUpXG5cbnJldmVudWVfZGF0YSRncm93dGhfcmF0ZSA8LU5BXG5yZXZlbnVlX2RhdGEkZ3Jvd3RoX3JhdGVbMjpyXSA8LSByZXZlbnVlX2RhdGEkZ3Jvd3RoWzI6cl0gLyByZXZlbnVlX2RhdGEkcmV2ZW51ZVsxOnItMV1cbnByaW50KHJldmVudWVfZGF0YSlcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuciA8LSBsZW5ndGgoeWVhcilcbnJldmVudWVfZGF0YSA8LSBkYXRhLmZyYW1lKHJldmVudWUpXG5yb3duYW1lcyhyZXZlbnVlX2RhdGEpIDwtIHllYXJcblxucmV2ZW51ZV9kYXRhJGdyb3d0aCA8LSBOQVxucmV2ZW51ZV9kYXRhJGdyb3d0aFsyOnJdIDwtIGRpZmYocmV2ZW51ZV9kYXRhJHJldmVudWUpXG5cbnJldmVudWVfZGF0YSRncm93dGhfcmF0ZSA8LU5BXG5yZXZlbnVlX2RhdGEkZ3Jvd3RoX3JhdGVbMjpyXSA8LSByZXZlbnVlX2RhdGEkZ3Jvd3RoWzI6cl0gLyByZXZlbnVlX2RhdGEkcmV2ZW51ZVsxOnItMV1cblxucHJpbnQoc2lnbmlmKHJldmVudWVfZGF0YSwgZGlnaXRzID0gMykpXG5gYGAifQ== -->
 <pre class="r"><code>r &lt;- length(year)
 revenue_data &lt;- data.frame(revenue)
 rownames(revenue_data) &lt;- year
@@ -1780,22 +1780,49 @@ revenue_data$growth[2:r] &lt;- diff(revenue_data$revenue)
 
 revenue_data$growth_rate &lt;-NA
 revenue_data$growth_rate[2:r] &lt;- revenue_data$growth[2:r] / revenue_data$revenue[1:r-1]
-print(revenue_data)</code></pre>
+
+print(signif(revenue_data, digits = 3))</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NSwibmNvbCI6Mywic3VtbWFyeSI6W119LCJyZGYiOiJINHNJQUFBQUFBQUFBd3R5aVREbWl1QmlZR0JnWm1CaFptUmdaZ1V5R1ZoRFE5eDBMUmdZV0ppQUhFWUdGZ1pPRUYwQlZDUU1Wc25Bd0FkUzVjaVR1d09rM0ZGUVhnTk1pMDl3QU5NeWEzNkFhZm00UHd3UUFGWmYvd0hFWkYvazhOd3BBY1J5K0hrRVFuOHBlZ0NtbjA1UXdLYmUvcFJlUm42NGNycjlEUkZMUHRZckNmYW5qeW83MW5sRzIrOFFFQXlvQ0pGR2N5aHJYbUp1YWpHUUlRRHhGbGlRdlNpMUxEV3ZOQlhLWlVzdnlpOHZ5WUR5dUNHOCtLTEVrbFEwd3ppQk1ub3dBOThCTWJJa2YwcHFXbXBSVVdwS2ZIRkpVV1plT3BvMFMxSmljU3BVakJjc0RuSFRQNmdZMkpNTzh6dkFQbmFZM3dPbEowRHBLVkI2QmpSTTRHWXdRTXhBOVhSeVRtSXh6Tk13UWE2VXhKSkV2YlFpb1BPeGFHSFBMeWpKek04RGFtSUNSU3NybW1iR0lqUUIvdEk4VUVDazZDWm5sT1psNnhxQ0xJQzZpQkhKZGF4SWJHYUlsVXovb1VheHdvSS9OUzg5TXc4V0dhdzVpVW1wT1ZBT0h6REF3ZUd0VndBTTBoS1lUNENpeFhvbCtTV0pNSFZjeWZrNU1CRklrUDREQUFhNjlzVE5BZ0FBIn0= -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NSwibmNvbCI6Mywic3VtbWFyeSI6W119LCJyZGYiOiJINHNJQUFBQUFBQUFBd3R5aVREbWl1QmlZR0JnWm1CaFptUmdaZ1V5R1ZoRFE5eDBMUmdZV0ppQUhFWUdGZ1pPRUYwQlZDUU1Wc25Bd0FkUzVjaFQ2QUJTN2lpb3RnQk1pL2REK0RMckQ0QnArWGd3SDZhKy9nT0l5YjdJNGJrZFdORGg1ME1JL2FXMEFVdy9uY3FBVGIzOUtkdUN4ZGU1Yk8xdkNDVDVYdnE0eXY3MHNlWHY1MjdTdGQ4QjRhTTVsRFV2TVRlMUdNZ1FnSGdMTE1oZWxGcVdtbGVhQ3VXeXBSZmxsNWRrUUhuY0VGNThVV0pKS3BwaG5FQVpQWmlCNzRBWVdaSS9KVFV0dGFnb05TVyt1S1FvTXk4ZFRab2xLYkU0RlNyR0N4YUh1T2tmVkF6c1NZZjVIWkJBbU44RHBTZEE2U2xRZWdZc1VHQm1NRURNUVBWMGNrNWlNY3pUTUVHdWxNU1NSTDIwSXFEenNXaGh6eThveWN6UEEycGlBa1VySzVwbXhpSTBBZjdTUEZCQXBPZ21aNVRtWmVzYWdTeUF1b2dSeVhXc1NHeG1pSlZNLzZGR3NjS0NQelV2UFRNUEZobXNPWWxKcVRsUURoOHd3TUhoclZjQUROSVNtRStBb3NWNkpma2xpVEIxWE1uNU9UQVJTSkQrQXdEc0lIdDB6UUlBQUE9PSJ9 -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["revenue"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["growth"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["growth_rate"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"232887","2":"NA","3":"NA","_rn_":"2018"},{"1":"280522","2":"47635","3":"0.20454126","_rn_":"2019"},{"1":"386064","2":"105542","3":"0.37623431","_rn_":"2020"},{"1":"469822","2":"83758","3":"0.21695367","_rn_":"2021"},{"1":"513983","2":"44161","3":"0.09399517","_rn_":"2022"}],"options":{"columns":{"min":{},"max":[10],"total":[3]},"rows":{"min":[10],"max":[10],"total":[5]},"pages":{}}}
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["revenue"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["growth"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["growth_rate"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"233000","2":"NA","3":"NA","_rn_":"2018"},{"1":"281000","2":"47600","3":"0.205","_rn_":"2019"},{"1":"386000","2":"106000","3":"0.376","_rn_":"2020"},{"1":"470000","2":"83800","3":"0.217","_rn_":"2021"},{"1":"514000","2":"44200","3":"0.094","_rn_":"2022"}],"options":{"columns":{"min":{},"max":[10],"total":[3]},"rows":{"min":[10],"max":[10],"total":[5]},"pages":{}}}
   </script>
 </div>
 <!-- rnb-frame-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5hZ3IgPC0gbWVhbihyZXZlbnVlX2RhdGEkZ3Jvd3RoX3JhdGUpXG5gYGAifQ== -->
-<pre class="r"><code>
-agr &lt;- mean(revenue_data$growth_rate)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWdyIDwtIG1lYW4ocmV2ZW51ZV9kYXRhJGdyb3d0aF9yYXRlKVxuYGBgIn0= -->
+<pre class="r"><code>agr &lt;- mean(revenue_data$growth_rate)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>In this section we calculate the net operating profit (NOP) and neta
+operating profit margin (NOPM). The formula is: <span class="math display">\[NOP=Revenue-({CGS}+{SGA}+{R\&amp;D})\]</span> and
+<span class="math display">\[NOPM=NOP/{OperatingRevenue}\]</span> Cost
+of Goods Sold (CGS), Selling, General and Administrative Expenses (SGA),
+Research and Development (RND). Operating revenue is revenue generated
+by the company’s primary business operations.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2dzIDwtIGMoMTIzODE1LCAxNDM3NDcsIDIwODA1NiwgMjM4MDQ4LCAyNDY5MTApXG5zZ2EgPC0gYyg1MjE3NywgNjQzMTMsIDg3MTkzLCAxMTY0ODUsIDEzODQyOClcbnJuZCA8LSBjKDI4ODM3LCAzNTkzMSwgNDI3NDAsIDU2MDUyLCA3MzIxMylcbm5vcCA8LSByZXZlbnVlIC0oY2dzICsgc2dhICsgcm5kKVxubm9wbSA8LSBub3AgLyByZXZlbnVlXG5ub3BtX2RhdGEgPC0gZGF0YS5mcmFtZShyZXZlbnVlLGNncyxzZ2Escm5kLG5vcCxub3BtKVxucm93bmFtZXMobm9wbV9kYXRhKSA8LSB5ZWFyXG5wcmludChzaWduaWYobm9wbV9kYXRhLCBkaWdpdHMgPSAzKSlcbmBgYCJ9 -->
+<pre class="r"><code>cgs &lt;- c(123815, 143747, 208056, 238048, 246910)
+sga &lt;- c(52177, 64313, 87193, 116485, 138428)
+rnd &lt;- c(28837, 35931, 42740, 56052, 73213)
+nop &lt;- revenue -(cgs + sga + rnd)
+nopm &lt;- nop / revenue
+nopm_data &lt;- data.frame(revenue,cgs,sga,rnd,nop,nopm)
+rownames(nopm_data) &lt;- year
+print(signif(nopm_data, digits = 3))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NSwibmNvbCI6Niwic3VtbWFyeSI6W119LCJyZGYiOiJINHNJQUFBQUFBQUFBMjFTTVVqRFFCUzl0RW1sd1ZiRndVWFVxVnU3dUxoSVdoQUhON1ZDdHhLYmF5M1dTMDFTZFZCd0VSMEVIVG9JRGhXMHM2c2dTQWRuQnhjVkJSRUZsWXJpSUM1U3ZkeS9neVk0aFBmKysrL2YvYnhrYWl3enJHWlVoRkFReVVFSkJSVktrVEtUSG8rUElDUUhhQ0VoR1lWZFhLR21Ya3BDOUltNnJsVG5ZdEsxcDNwaUJ3ejdkcUR1UDI0d0hNeXlXdmlUclhGV3BLUXFZTmdBakVUV0dVWmpEWS8vZFkwVnlRL00rc212Q2FoL3BtQU9YYTk3L0hkRDBIL1lCUC9URFdEVEFQeThSeDcvN1NMM1gwTC9lUlh3N1FYMFpzVGoxODVPSnBzYkF5ZGE0L0JLSFMwZmFYeGJyVEYwdmw5L1RHdW45Y2ZwNzRzYlgzQUswUmV3VFVrM0N3L0VEZ3N2WVZMQnZBem1DcmFnZGtFWDFDS0dvTVFzY3lwVHV1QzdJMnlaeXdseHp6dDkycHRkQnM1ank4SkcxbmFzSWluNDJ2S3NibU91UlpnT3E3YTRCbG5WdGlDVDJqYkhYWTVWam5zaUszRUdnak84V2VSS3VpMnlFS0pxNkk2ZXlGdDAvWDlHT3N5eVV6UUpIUXE0ZjUvaUc1WXNuOUJWSVc0UVJqdzNWeUh6OFdIM0FyNlIxTGFkMHNaRGNHWGdseCtsOEtOQ21CU0tSSHdqcGFUUDRoSXZvalJ3bG5laVRDTjF4SnRRMVU0NHBxTUxuNW96UzBLQlNGdC9vRzMrOUhRREFBQT0ifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["revenue"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["cgs"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["sga"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["rnd"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["nop"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["nopm"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"233000","2":"124000","3":"52200","4":"28800","5":"28100","6":"0.120","_rn_":"2018"},{"1":"281000","2":"144000","3":"64300","4":"35900","5":"36500","6":"0.130","_rn_":"2019"},{"1":"386000","2":"208000","3":"87200","4":"42700","5":"48100","6":"0.125","_rn_":"2020"},{"1":"470000","2":"238000","3":"116000","4":"56100","5":"59200","6":"0.126","_rn_":"2021"},{"1":"514000","2":"247000","3":"138000","4":"73200","5":"55400","6":"0.108","_rn_":"2022"}],"options":{"columns":{"min":{},"max":[10],"total":[6]},"rows":{"min":[10],"max":[10],"total":[5]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-chunk-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiQW1hem9uIEFuYWx5c2lzIgpvdXRwdXQ6CiAgaHRtbF9ub3RlYm9vazoKICAgIGRmX3ByaW50OiBrYWJsZQotLS0KCgpGcm9tIGh0dHBzOi8vd3d3Lndzai5jb20vbWFya2V0LWRhdGEvcXVvdGVzL0FNWk4vZmluYW5jaWFscy9hbm51YWwvaW5jb21lLXN0YXRlbWVudAoKQW5hbHl6ZSByZXZlbnVlIGdyb3d0aApgYGB7cn0KeWVhciA8LSBjKDIwMTgsIDIwMTksIDIwMjAsIDIwMjEsIDIwMjIpCnJldmVudWUgPC0gYygyMzI4ODcsIDI4MDUyMiwgMzg2MDY0LCA0Njk4MjIsIDUxMzk4MykKCnBsb3RfaGVpZ2h0IDwtIHNpZ25pZihyZXZlbnVlLzEwMDAsIGRpZ2l0cyA9IDMpCmJhcnBsb3QocGxvdF9oZWlnaHQsIG5hbWVzLmFyZyA9IHllYXIsIG1haW4gPSAnQW1hem9uLmNvbSBTYWxlcy9SZXZlbnVlJywgeGxhYiA9ICdZZWFyJywgeWxhYiA9ICJCaWxsaW9uIERvbGxhcnMiKQpgYGAKCmBgYHtyfQpyIDwtIGxlbmd0aCh5ZWFyKQpyZXZlbnVlX2RhdGEgPC0gZGF0YS5mcmFtZShyZXZlbnVlKQpyb3duYW1lcyhyZXZlbnVlX2RhdGEpIDwtIHllYXIKCnJldmVudWVfZGF0YSRncm93dGggPC0gTkEKcmV2ZW51ZV9kYXRhJGdyb3d0aFsyOnJdIDwtIGRpZmYocmV2ZW51ZV9kYXRhJHJldmVudWUpCgpyZXZlbnVlX2RhdGEkZ3Jvd3RoX3JhdGUgPC1OQQpyZXZlbnVlX2RhdGEkZ3Jvd3RoX3JhdGVbMjpyXSA8LSByZXZlbnVlX2RhdGEkZ3Jvd3RoWzI6cl0gLyByZXZlbnVlX2RhdGEkcmV2ZW51ZVsxOnItMV0KcHJpbnQocmV2ZW51ZV9kYXRhKQoKYWdyIDwtIG1lYW4ocmV2ZW51ZV9kYXRhJGdyb3d0aF9yYXRlKQpgYGAK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiQW1hem9uIEFuYWx5c2lzIgpvdXRwdXQ6CiAgaHRtbF9ub3RlYm9vazoKICAgIGRmX3ByaW50OiBrYWJsZQotLS0KCgpGcm9tIGh0dHBzOi8vd3d3Lndzai5jb20vbWFya2V0LWRhdGEvcXVvdGVzL0FNWk4vZmluYW5jaWFscy9hbm51YWwvaW5jb21lLXN0YXRlbWVudAoKQW5hbHl6ZSByZXZlbnVlIGdyb3d0aApgYGB7cn0KeWVhciA8LSBjKDIwMTgsIDIwMTksIDIwMjAsIDIwMjEsIDIwMjIpCnJldmVudWUgPC0gYygyMzI4ODcsIDI4MDUyMiwgMzg2MDY0LCA0Njk4MjIsIDUxMzk4MykKCnBsb3RfaGVpZ2h0IDwtIHNpZ25pZihyZXZlbnVlLzEwMDAsIGRpZ2l0cyA9IDMpCmJhcnBsb3QocGxvdF9oZWlnaHQsIG5hbWVzLmFyZyA9IHllYXIsIG1haW4gPSAnQW1hem9uLmNvbSBTYWxlcy9SZXZlbnVlJywgeGxhYiA9ICdZZWFyJywgeWxhYiA9ICJCaWxsaW9uIERvbGxhcnMiKQpgYGAKCmBgYHtyfQpyIDwtIGxlbmd0aCh5ZWFyKQpyZXZlbnVlX2RhdGEgPC0gZGF0YS5mcmFtZShyZXZlbnVlKQpyb3duYW1lcyhyZXZlbnVlX2RhdGEpIDwtIHllYXIKCnJldmVudWVfZGF0YSRncm93dGggPC0gTkEKcmV2ZW51ZV9kYXRhJGdyb3d0aFsyOnJdIDwtIGRpZmYocmV2ZW51ZV9kYXRhJHJldmVudWUpCgpyZXZlbnVlX2RhdGEkZ3Jvd3RoX3JhdGUgPC1OQQpyZXZlbnVlX2RhdGEkZ3Jvd3RoX3JhdGVbMjpyXSA8LSByZXZlbnVlX2RhdGEkZ3Jvd3RoWzI6cl0gLyByZXZlbnVlX2RhdGEkcmV2ZW51ZVsxOnItMV0KCnByaW50KHNpZ25pZihyZXZlbnVlX2RhdGEsIGRpZ2l0cyA9IDMpKQphZ3IgPC0gbWVhbihyZXZlbnVlX2RhdGEkZ3Jvd3RoX3JhdGUpCmBgYAoKSW4gdGhpcyBzZWN0aW9uIHdlIGNhbGN1bGF0ZSB0aGUgbmV0IG9wZXJhdGluZyBwcm9maXQgKE5PUCkgYW5kIG5ldGEgb3BlcmF0aW5nIHByb2ZpdCBtYXJnaW4gKE5PUE0pLgpUaGUgZm9ybXVsYSBpczoKJCROT1A9UmV2ZW51ZS0oe0NHU30re1NHQX0re1JcJkR9KSQkCmFuZAokJE5PUE09Tk9QL3tPcGVyYXRpbmdSZXZlbnVlfSQkCkNvc3Qgb2YgR29vZHMgU29sZCAoQ0dTKSwgU2VsbGluZywgR2VuZXJhbCBhbmQgQWRtaW5pc3RyYXRpdmUgRXhwZW5zZXMgKFNHQSksIFJlc2VhcmNoIGFuZCBEZXZlbG9wbWVudCAoUk5EKS4gT3BlcmF0aW5nIHJldmVudWUgaXMgcmV2ZW51ZSBnZW5lcmF0ZWQgYnkgdGhlIGNvbXBhbnkncyBwcmltYXJ5IGJ1c2luZXNzIG9wZXJhdGlvbnMuCgpgYGB7cn0KY2dzIDwtIGMoMTIzODE1LCAxNDM3NDcsIDIwODA1NiwgMjM4MDQ4LCAyNDY5MTApCnNnYSA8LSBjKDUyMTc3LCA2NDMxMywgODcxOTMsIDExNjQ4NSwgMTM4NDI4KQpybmQgPC0gYygyODgzNywgMzU5MzEsIDQyNzQwLCA1NjA1MiwgNzMyMTMpCm5vcCA8LSByZXZlbnVlIC0oY2dzICsgc2dhICsgcm5kKQpub3BtIDwtIG5vcCAvIHJldmVudWUKbm9wbV9kYXRhIDwtIGRhdGEuZnJhbWUocmV2ZW51ZSxjZ3Msc2dhLHJuZCxub3Asbm9wbSkKcm93bmFtZXMobm9wbV9kYXRhKSA8LSB5ZWFyCnByaW50KHNpZ25pZihub3BtX2RhdGEsIGRpZ2l0cyA9IDMpKQpgYGA=</div>
 
 
 
