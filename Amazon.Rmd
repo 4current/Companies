@@ -75,11 +75,12 @@ So not let's look at the company's projected NOP given an excess return period (
 
 ```{r}
 ERP <- 7
+future_years  <- seq(year[length(year)] + 1, length.out = ERP)
 future_revenue <- cumprod(c(revenue[5], rep((1+cagr), ERP)))
 future_revenue <- future_revenue[2:length(future_revenue)]
 future_nopm_data <- data.frame(future_revenue, (future_revenue * anopm))
 colnames(future_nopm_data) <- c('revenue', 'nop')
-rownames(future_nopm_data) <- seq(year[length(year)] + 1, length.out = ERP)
+rownames(future_nopm_data) <- future_years
 print(signif(future_nopm_data, digits = 3))
 ```
 
@@ -107,6 +108,7 @@ print(paste("Average Unadjusted Tax Rate: ", unadjusted_tax_rate ))
 tax_rate <- unadjusted_tax_rate
 print(tax_rate)
 nopat_table <- data.frame('nop' = future_nopm_data$nop, 'nopat' = future_nopm_data$nop * (1 - tax_rate))
+rownames(nopat_table) <- future_years
 print(nopat_table)
 ```
 
