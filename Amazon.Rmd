@@ -1,36 +1,33 @@
 ---
 title: "Amazon Analysis"
-output: html_notebook
+output:
+  html_notebook:
+    df_print: kable
 ---
+
 
 From https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statement
 
+Analyze revenue growth
 ```{r}
 year <- c(2018, 2019, 2020, 2021, 2022)
 revenue <- c(232887, 280522, 386064, 469822, 513983)
-n_rows <- length(revenue)
-revenue_data <- data.frame(year,revenue)
 
-growth <- diff(revenue_data$revenue)
+plot_height <- signif(revenue/1000, digits = 3)
+barplot(plot_height, names.arg = year, main = 'Amazon.com Sales/Revenue', xlab = 'Year', ylab = "Billion Dollars")
+```
+
+```{r}
+r <- length(year)
+revenue_data <- data.frame(revenue)
+rownames(revenue_data) <- year
+
 revenue_data$growth <- NA
-revenue_data$growth[2:n_rows] <- growth
+revenue_data$growth[2:r] <- diff(revenue_data$revenue)
 
-growth_rate <- growth / revenue_data$revenue[1:n_rows-1]
-revenue_data$growth_rate <- NA
-revenue_data$growth_rate[2:n_rows] <- growth_rate
+revenue_data$growth_rate <-NA
+revenue_data$growth_rate[2:r] <- revenue_data$growth[2:r] / revenue_data$revenue[1:r-1]
+print(revenue_data)
 
-plot_matrix <- cbind(revenue_data$revenue, revenue_data$growth)
-row.names(plot_matrix) <- revenue_data$year
-
-print(plot_matrix)
-#begin_sales <- sales[1:length(sales)-1]
-#names(sales) <- year
-#growth <- growth
-#agr <- mean(percent_growth)
-
-#print(percent_growth)
-
-barplot(plot_matrix, beside = TRUE, names.arg = revenue_data$year)
-#barplot(growth)
-#print(agr)
+agr <- mean(revenue_data$growth_rate)
 ```
