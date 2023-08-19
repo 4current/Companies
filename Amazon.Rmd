@@ -29,7 +29,7 @@ revenue_data$growth_rate <-NA
 revenue_data$growth_rate[2:r] <- revenue_data$growth[2:r] / revenue_data$revenue[1:r-1]
 
 print(signif(revenue_data, digits = 3))
-agr <- mean(revenue_data$growth_rate)
+
 ```
 
 In this section we calculate the net operating profit (NOP) and neta operating profit margin (NOPM).
@@ -48,4 +48,32 @@ nopm <- nop / revenue
 nopm_data <- data.frame(revenue,cgs,sga,rnd,nop,nopm)
 rownames(nopm_data) <- year
 print(signif(nopm_data, digits = 3))
+
+```
+
+```{r}
+library("COINr")
+periods <- 3
+idx_range <- (length(year)-periods+1):length(year)
+agr <- mean(revenue_data$growth_rate[idx_range])
+print(index_range)
+cagr_range <- (length(year)-periods):length(year)
+
+cagr <- CAGR(revenue[cagr_range],year[cagr_range])
+anopm <- mean(nopm[idx_range])
+
+print(paste(periods,"Year Average Growth Rate", signif(agr, digits = 3)))
+print(paste(periods,"Year Compound Average Growth Rate", signif(cagr, digits = 3)))
+print(paste(periods,"Year Average Net Operating Profit Margin", signif(anopm, digits = 3)))
+```
+So not let's look at the company's projected NOP given an excess return period (ERP) of 7 years
+
+```{r}
+ERP <- 7
+future_revenue <- cumprod(c(revenue[5], rep((1+cagr), ERP)))
+future_revenue <- future_revenue[2:length(future_revenue)]
+future_nopm_data <- data.frame(future_revenue, (future_revenue * anopm))
+colnames(future_nopm_data) <- c('revenue', 'nop')
+rownames(future_nopm_data) <- seq(year[length(year)] + 1, length.out = ERP)
+print(signif(future_nopm_data, digits = 3))
 ```
