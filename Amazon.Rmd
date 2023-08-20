@@ -9,18 +9,28 @@ output:
 From https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statement
 
 ## Analyze revenue growth - Top Line
-```{r}
-library("rvest")
+```{r, results = 'asis' }
+library(rvest)
+library(data.table)
 url <- 'https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statement'
 wsj_tbl <- read_html(url) %>%
   html_element(xpath = '//table[@class="cr_dataTable"]') %>%
-  html_table(header = TRUE)
+  html_table()
 
-wsj_df <- as.data.frame(wsj_tbl)
-
-year <- rev(names(wsj_df[,2:6]))
-selected_row <- as.vector(wsj_df[wsj_df[,1]=="Sales/Revenue",2:6])
-revenue <- as.numeric(gsub(",","",rev(selected_row)))
+wsj_df <- as.data.frame(wsj_tbl[wsj_tbl[,1]!="",1:6])
+year_vals <- colnames(wsj_df)[2:6]
+data_labels <- wsj_df[,1]
+data_values <- wsj_df[,2:6]
+wsj_df <- transpose(data_values)
+wsj_df <- data.frame(year_vals, wsj_df)
+wsj_df[wsj_df=="-"] <- NA
+colnames(wsj_df) <- c("Year", data_labels)
+wsj_df <- wsj_df[,colSums(is.na(wsj_df))<nrow(wsj_df)]
+wsj_df <- wsj_df[rev(rownames(wsj_df)),]
+rownames(wsj_df) <- NULL
+print(wsj_df)
+year <- wsj_df$Year
+revenue <- as.numeric(gsub(",", "", wsj_df$`Sales/Revenue`))
 
 plot_height <- signif(revenue/1000, digits = 3)
 barplot(plot_height, names.arg = year, main = 'Amazon.com Sales/Revenue', xlab = 'Year', ylab = "Billion Dollars")
@@ -68,7 +78,6 @@ library("COINr")
 periods <- 3
 idx_range <- (length(year)-periods+1):length(year)
 agr <- mean(revenue_data$growth_rate[idx_range])
-print(index_range)
 cagr_range <- (length(year)-periods):length(year)
 
 cagr <- CAGR(revenue[cagr_range],year[cagr_range])
