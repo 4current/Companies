@@ -10,8 +10,17 @@ From https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statem
 
 ## Analyze revenue growth - Top Line
 ```{r}
-year <- c(2018, 2019, 2020, 2021, 2022)
-revenue <- c(232887, 280522, 386064, 469822, 513983)
+library("rvest")
+url <- 'https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statement'
+wsj_tbl <- read_html(url) %>%
+  html_element(xpath = '//table[@class="cr_dataTable"]') %>%
+  html_table(header = TRUE)
+
+wsj_df <- as.data.frame(wsj_tbl)
+
+year <- rev(names(wsj_df[,2:6]))
+selected_row <- as.vector(wsj_df[wsj_df[,1]=="Sales/Revenue",2:6])
+revenue <- as.numeric(gsub(",","",rev(selected_row)))
 
 plot_height <- signif(revenue/1000, digits = 3)
 barplot(plot_height, names.arg = year, main = 'Amazon.com Sales/Revenue', xlab = 'Year', ylab = "Billion Dollars")
