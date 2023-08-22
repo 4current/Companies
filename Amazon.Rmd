@@ -5,22 +5,57 @@ output:
     df_print: kable
 ---
 
+```{r}
+library(rvest)
+
+# Define Functions
+
+# get and cache data
+getWSJWebData <- function(ticker, period, form) {
+  fname <- paste('wsj', ticker,  period, form, format(Sys.Date(), "%Y%m"), 'tibble.rds',
+                 sep = '_')
+  if(file.exists(fname)){
+    print('Reading saved tibble')
+    wsj_tbl <- readRDS(fname)
+  } else {
+    print('Fetching data from WSJ')
+    url <- paste('https://www.wsj.com/market-data/quotes', ticker,
+                 'financials', period, form, sep = '/')
+    print(url)
+    wsj_tbl <- read_html(url) %>%
+      html_element('table.cr_dataTable') %>%
+      html_table()
+    saveRDS(wsj_tbl, file=fname)
+  }
+  wsj_tbl
+}
+
+# Compound Annual Growth Rate
+computeCAGR <- function(y, x) {
+  n <- length(x) - 1
+  (y[length(y)] / y[1]) ^ (1/n) - 1
+}
+
+# Get rid of commas and make numeric
+my_text_to_num <- function(x) {
+  y <- gsub(",", replacement = "", x)
+  as.numeric(gsub('\\(([0-9.]+)\\)', '-\\1', y))
+}
+
+```
 
 From https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statement
 
 ## Analyze revenue growth - Top Line
 ```{r, results = 'asis' }
-library(rvest)
-library(data.table)
-url <- 'https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statement'
-wsj_tbl <- read_html(url) %>%
-  html_element(xpath = '//table[@class="cr_dataTable"]') %>%
-  html_table()
+
+wsj_tbl <- getWSJWebData(ticker = 'AMZN', period = 'annual', form = 'income-statement')
 
 # Only the first 6 columns matter, after that there are unusable graphical components
 # Also delete rows with "" in column 1, they are for formatting purposes and contain
 # no data
 wsj_df <- as.data.frame(wsj_tbl[wsj_tbl[,1]!="",1:6])
+
 
 # The meaning of each row is in column 1
 # The year values are in the names of columns 2-6, save and reverse the order
@@ -29,50 +64,42 @@ data_labels <- wsj_df[,1]
 year_vals <- rev(colnames(wsj_df)[2:6])
 
 # Select only the year columns using the preferred order and then transpose
-wsj_df <- transpose(wsj_df[,year_vals])
+#wsj_df <- transpose(wsj_df[,year_vals])
+wsj_df <- data.frame(t(wsj_df[,year_vals]))
+wsj_df <- cbind(year_vals, wsj_df)
+
 
 # Add back row and column names to the transposed data
-rownames(wsj_df) <- year_vals
-colnames(wsj_df) <- data_labels
+colnames(wsj_df) <- c('Year',data_labels)
+
 
 # Empty cells have a "-". Replace them with NA and delete all columns that have all NA.
 wsj_df[wsj_df=="-"] <- NA
 wsj_df <- wsj_df[,colSums(is.na(wsj_df))<nrow(wsj_df)]
 
+
 # Delete columns with names that match "Growth" or "Margin" we can calculate those
 wsj_df <- wsj_df[, !grepl('(Growth|Margin)$', colnames(wsj_df), ignore.case = TRUE)]
 data_labels <-  colnames(wsj_df)
 
-my_text_to_num <- function(x) {
-  y <- gsub(",", replacement = "", x)
-  as.numeric(gsub('\\(([0-9.]+)\\)', '-\\1', y))
-}
-
+# Make values numeric but lapply/data.frame messes with names so fix
 wsj_df <- data.frame(lapply(wsj_df, 'my_text_to_num'))
-
-rownames(wsj_df) <- year_vals
 colnames(wsj_df) <- data_labels
-print(wsj_df)
 
 revenue <- as.numeric(gsub(",", "", wsj_df$`Sales/Revenue`))
 # 
-plot_height <- signif(revenue/1000, digits = 3)
-barplot(plot_height, names.arg = year_vals, main = 'Amazon.com Sales/Revenue', xlab = 'Year', ylab = "Billion Dollars")
+barplot(signif(revenue/1000, digits = 3), names.arg = wsj_df$Year, main = 'Amazon.com Sales/Revenue', xlab = 'Year', ylab = "Billion Dollars")
+
+wsj_df
 ```
 # Revenue Growth
 
 ```{r}
-r <- length(year)
-revenue_data <- data.frame(revenue)
-rownames(revenue_data) <- year
-
-revenue_data$growth <- NA
-revenue_data$growth[2:r] <- diff(revenue_data$revenue)
-
-revenue_data$growth_rate <-NA
-revenue_data$growth_rate[2:r] <- revenue_data$growth[2:r] / revenue_data$revenue[1:r-1]
-
-print(signif(revenue_data, digits = 3))
+revenue_data <- wsj_df[, c('Year', 'Sales/Revenue')]
+y <- length(revenue_data$Year)      
+revenue_data$growth[2:y] <- diff(revenue_data$`Sales/Revenue`)
+revenue_data$growth_rate[2:y] <- revenue_data$growth[2:y] / revenue_data$`Sales/Revenue`[1:(y - 1)]
+print(revenue_data)
 
 ```
 
@@ -87,26 +114,27 @@ Cost of Goods Sold (CGS), Selling, General and Administrative Expenses (SGA), Re
 
 ```{r}
 
+year <- wsj_df$Year
 revenue <- wsj_df$`Sales/Revenue`
 cgs <- wsj_df$`COGS excluding D&A`
-sga <- wsj_df$`SG&A Expense`
+sga <- wsj_df$`Other SG&A`
 rnd <- wsj_df$`Research & Development`
-nop <- wsj_df$`Sales/Revenue` -(cgs + sga + rnd)
+
+nop <- revenue - (cgs + sga + rnd)
 nopm <- nop / revenue
-nopm_data <- data.frame(revenue,cgs,sga,rnd,nop,nopm)
-rownames(nopm_data) <- year
-print(signif(nopm_data, digits = 3))
+nopm_data <- data.frame(year, revenue, cgs, sga, rnd, nop, nopm)
+
+print(nopm_data)
 
 ```
 ## Averages Growth and NOPM
 ```{r}
-library("COINr")
 periods <- 3
 idx_range <- (length(year)-periods+1):length(year)
 agr <- mean(revenue_data$growth_rate[idx_range])
 cagr_range <- (length(year)-periods):length(year)
 
-cagr <- CAGR(revenue[cagr_range],year[cagr_range])
+cagr <- computeCAGR(revenue[cagr_range],as.numeric(year[cagr_range]))
 anopm <- mean(nopm[idx_range])
 
 print(paste(periods,"Year Average Growth Rate", signif(agr, digits = 3)))
@@ -119,13 +147,11 @@ So not let's look at the company's projected NOP given an excess return period (
 
 ```{r}
 ERP <- 7
-future_years  <- seq(year[length(year)] + 1, length.out = ERP)
-future_revenue <- cumprod(c(revenue[5], rep((1+cagr), ERP)))
-future_revenue <- future_revenue[2:length(future_revenue)]
-future_nopm_data <- data.frame(future_revenue, (future_revenue * anopm))
-colnames(future_nopm_data) <- c('revenue', 'nop')
-rownames(future_nopm_data) <- future_years
-print(signif(future_nopm_data, digits = 3))
+year  <- seq(wsj_df$Year[length(wsj_df$Year)] + 1, length.out = ERP)
+projected_revenue <- cumprod(c(wsj_df$`Sales/Revenue`[5], rep((1+cagr), ERP)))[2:(ERP + 1)]
+nopm <- projected_revenue * anopm
+nopm_df <- data.frame(year, revenue = projected_revenue, nopm = nopm)
+print(nopm_df)
 ```
 
 ## Taxes
@@ -133,15 +159,15 @@ Figure out an average tax rate fom historical data. Depreciation and Amortizatio
 Ity seems in some cases there is negative adjustments so lelt's exclude that for tha average.
 
 ```{r}
-income_before_tax <-c(11261, 13976, 24178, 38151, -5936)
-income_taxes <- c(1197, 2374, 2863, 4791, -3217)
+income_before_tax <- wsj_df$`Pretax Income`
+income_taxes <- wsj_df$`Income Tax`
 tax_rate <- income_taxes / income_before_tax
-tax_table <- data.frame(income_before_tax, income_taxes, tax_rate)
-row.names(tax_table) <- year
+year <- wsj_df$Year
+tax_table <- data.frame(year, income_before_tax, income_taxes, tax_rate)
 print(tax_table)
 ```
 ```{r}
-unadjusted_tax_rate <- mean(tax_rate[2:4])
+unadjusted_tax_rate <- mean(tax_table$tax_rate[2:4])
 print(paste("Average Unadjusted Tax Rate: ", unadjusted_tax_rate ))
 ```
 
@@ -151,8 +177,16 @@ print(paste("Average Unadjusted Tax Rate: ", unadjusted_tax_rate ))
 # for now ... unadjusted
 tax_rate <- unadjusted_tax_rate
 print(tax_rate)
-nopat_table <- data.frame('nop' = future_nopm_data$nop, 'nopat' = future_nopm_data$nop * (1 - tax_rate))
+nopat_table <- data.frame(year = nopm_df$year, 'nop' = nopm_df$nop, 'nopat' = nopm_df$nop * (1 - tax_rate))
 rownames(nopat_table) <- future_years
 print(nopat_table)
+```
+
+## Investment and Depreciatiob Costs
+```{r}
+wsj_cf_tbl <- getWSJWebData(ticker = 'AMZN', period = 'annual', form = 'cash-flow')
+
+print(wsj_cf_tbl)
+
 ```
 
