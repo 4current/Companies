@@ -64,7 +64,7 @@ wsj_table_clean_format <- function(raw_table) {
   # Only the first 6 columns matter, after that there are unusable graphical components
   # Also delete rows with "" in column 1, they are for formatting purposes and contain
   # no data
-  wsj_df <- as.data.frame(wsj_tbl[wsj_tbl[, 1] != "", 1:6])
+  wsj_df <- as.data.frame(raw_table[raw_table[, 1] != "", 1:6])
   
   
   # The meaning of each row is in column 1. The year values are in the names of
@@ -182,10 +182,10 @@ So not let's look at the company's projected NOP given an excess return period (
 
 ```{r}
 ERP <- 7
-year  <- seq(wsj_df$Year[length(wsj_df$Year)] + 1, length.out = ERP)
+future_years  <- seq(wsj_df$Year[length(wsj_df$Year)] + 1, length.out = ERP)
 projected_revenue <- cumprod(c(wsj_df$`Sales/Revenue`[5], rep((1+cagr), ERP)))[2:(ERP + 1)]
 nopm <- projected_revenue * anopm
-nopm_df <- data.frame(year, revenue = projected_revenue, nopm = nopm)
+nopm_df <- data.frame(year = future_years, revenue = projected_revenue, nopm = nopm)
 print(nopm_df)
 ```
 
@@ -214,7 +214,7 @@ tax_rate <- unadjusted_tax_rate
 print(tax_rate)
 nopat_table <- data.frame(year = nopm_df$year, 'nop' = nopm_df$nop, 'nopat' = nopm_df$nop * (1 - tax_rate))
 rownames(nopat_table) <- future_years
-print(nopat_table)
+nopat_table
 ```
 
 ## Investment and Depreciatiob Costs
