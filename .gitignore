@@ -49,4 +49,4 @@ po/*~
 rsconnect/
 
 #### My Mods
-.rds
+*.rds
