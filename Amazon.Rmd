@@ -8,24 +8,42 @@ output:
 ```{r}
 library(rvest)
 
+#httr::set_config(httr::user_agent("r.morrisey@computer.org"))
+
 # Define Functions
 
 # get and cache data
 getWSJWebData <- function(ticker, period, form) {
-  fname <- paste('wsj', ticker,  period, form, format(Sys.Date(), "%Y%m"), 'tibble.rds',
-                 sep = '_')
-  if(file.exists(fname)){
+  fname <-
+    paste('wsj',
+          ticker,
+          period,
+          form,
+          format(Sys.Date(), "%Y%m"),
+          'tibble.rds',
+          sep = '_')
+  if (file.exists(fname)) {
     print('Reading saved tibble')
     wsj_tbl <- readRDS(fname)
   } else {
     print('Fetching data from WSJ')
-    url <- paste('https://www.wsj.com/market-data/quotes', ticker,
-                 'financials', period, form, sep = '/')
-    print(url)
-    wsj_tbl <- read_html(url) %>%
-      html_element('table.cr_dataTable') %>%
-      html_table()
-    saveRDS(wsj_tbl, file=fname)
+    url <- paste(
+      'https://www.wsj.com/market-data/quotes',
+      ticker,
+      'financials',
+      period,
+      form,
+      sep = '/'
+    )
+    wsj_tbl <- NULL
+    tables <- read_html(url) %>%
+      html_elements('table.cr_dataTable')
+    for (table in tables) {
+      part <- table %>% html_table()
+      colnames(part)[1] <- ""
+      wsj_tbl <- rbind(wsj_tbl, part)
+    }
+    saveRDS(wsj_tbl, file = fname)
   }
   wsj_tbl
 }
@@ -42,6 +60,45 @@ my_text_to_num <- function(x) {
   as.numeric(gsub('\\(([0-9.]+)\\)', '-\\1', y))
 }
 
+wsj_table_clean_format <- function(raw_table) {
+  # Only the first 6 columns matter, after that there are unusable graphical components
+  # Also delete rows with "" in column 1, they are for formatting purposes and contain
+  # no data
+  wsj_df <- as.data.frame(wsj_tbl[wsj_tbl[, 1] != "", 1:6])
+  
+  
+  # The meaning of each row is in column 1. The year values are in the names of
+  # columns 2-6, save and reverse the order The WSJ uses reverse chronological
+  # order, we prefer chronological (ascending) order
+  data_labels <- wsj_df[, 1]
+  year_vals <- rev(colnames(wsj_df)[2:6])
+  
+  # Select only the year columns using the preferred order and then transpose
+  #wsj_df <- transpose(wsj_df[,year_vals])
+  wsj_df <- data.frame(t(wsj_df[, year_vals]))
+  wsj_df <- cbind(year_vals, wsj_df)
+  
+  
+  # Add back row and column names to the transposed data
+  colnames(wsj_df) <- c('Year', data_labels)
+  
+  
+  # Empty cells have a "-". Replace them with NA and delete all columns that have all NA.
+  wsj_df[wsj_df == "-"] <- NA
+  wsj_df <- wsj_df[, colSums(is.na(wsj_df)) < nrow(wsj_df)]
+  
+  
+  # Delete columns with names that match "Growth" or "Margin" we can calculate those
+  wsj_df <-
+    wsj_df[,!grepl('(Growth|Margin|Yield| / Sales)$', colnames(wsj_df), ignore.case = TRUE)]
+  data_labels <-  colnames(wsj_df)
+  
+  # Make values numeric but lapply/data.frame messes with names so fix
+  wsj_df <- data.frame(lapply(wsj_df, 'my_text_to_num'))
+  colnames(wsj_df) <- data_labels
+  wsj_df
+}
+
 ```
 
 From https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statement
@@ -49,57 +106,35 @@ From https://www.wsj.com/market-data/quotes/AMZN/financials/annual/income-statem
 ## Analyze revenue growth - Top Line
 ```{r, results = 'asis' }
 
-wsj_tbl <- getWSJWebData(ticker = 'AMZN', period = 'annual', form = 'income-statement')
-
-# Only the first 6 columns matter, after that there are unusable graphical components
-# Also delete rows with "" in column 1, they are for formatting purposes and contain
-# no data
-wsj_df <- as.data.frame(wsj_tbl[wsj_tbl[,1]!="",1:6])
-
-
-# The meaning of each row is in column 1
-# The year values are in the names of columns 2-6, save and reverse the order
-# The WSJ uses reverse chronological order, we prefer chronological (ascending) order
-data_labels <- wsj_df[,1]
-year_vals <- rev(colnames(wsj_df)[2:6])
-
-# Select only the year columns using the preferred order and then transpose
-#wsj_df <- transpose(wsj_df[,year_vals])
-wsj_df <- data.frame(t(wsj_df[,year_vals]))
-wsj_df <- cbind(year_vals, wsj_df)
-
-
-# Add back row and column names to the transposed data
-colnames(wsj_df) <- c('Year',data_labels)
-
-
-# Empty cells have a "-". Replace them with NA and delete all columns that have all NA.
-wsj_df[wsj_df=="-"] <- NA
-wsj_df <- wsj_df[,colSums(is.na(wsj_df))<nrow(wsj_df)]
-
-
-# Delete columns with names that match "Growth" or "Margin" we can calculate those
-wsj_df <- wsj_df[, !grepl('(Growth|Margin)$', colnames(wsj_df), ignore.case = TRUE)]
-data_labels <-  colnames(wsj_df)
-
-# Make values numeric but lapply/data.frame messes with names so fix
-wsj_df <- data.frame(lapply(wsj_df, 'my_text_to_num'))
-colnames(wsj_df) <- data_labels
+wsj_df <- wsj_table_clean_format(getWSJWebData(
+  ticker = 'AMZN',
+  period = 'annual',
+  form = 'income-statement'
+))
 
 revenue <- as.numeric(gsub(",", "", wsj_df$`Sales/Revenue`))
-# 
-barplot(signif(revenue/1000, digits = 3), names.arg = wsj_df$Year, main = 'Amazon.com Sales/Revenue', xlab = 'Year', ylab = "Billion Dollars")
+#
+barplot(
+  signif(revenue / 1000, digits = 3),
+  names.arg = wsj_df$Year,
+  main = 'Amazon.com Sales/Revenue',
+  xlab = 'Year',
+  ylab = "Billion Dollars"
+)
 
 wsj_df
+
 ```
 # Revenue Growth
 
 ```{r}
+
 revenue_data <- wsj_df[, c('Year', 'Sales/Revenue')]
-y <- length(revenue_data$Year)      
+y <- length(revenue_data$Year)
 revenue_data$growth[2:y] <- diff(revenue_data$`Sales/Revenue`)
-revenue_data$growth_rate[2:y] <- revenue_data$growth[2:y] / revenue_data$`Sales/Revenue`[1:(y - 1)]
-print(revenue_data)
+revenue_data$growth_rate[2:y] <-
+  revenue_data$growth[2:y] / revenue_data$`Sales/Revenue`[1:(y - 1)]
+revenue_data
 
 ```
 
@@ -124,7 +159,7 @@ nop <- revenue - (cgs + sga + rnd)
 nopm <- nop / revenue
 nopm_data <- data.frame(year, revenue, cgs, sga, rnd, nop, nopm)
 
-print(nopm_data)
+nopm_data
 
 ```
 ## Averages Growth and NOPM
@@ -184,9 +219,11 @@ print(nopat_table)
 
 ## Investment and Depreciatiob Costs
 ```{r}
-wsj_cf_tbl <- getWSJWebData(ticker = 'AMZN', period = 'annual', form = 'cash-flow')
 
-print(wsj_cf_tbl)
+wsj_cf_df <- wsj_table_clean_format(
+  getWSJWebData(ticker = 'AMZN', period = 'annual', form = 'cash-flow')
+)
+wsj_cf_df
 
 ```
 
