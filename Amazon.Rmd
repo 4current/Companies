@@ -267,6 +267,8 @@ projected_net_investment_df <- data.frame(
 projected_net_investment_df
 
 ```
+
+
 ```{r}
 # Working Capital
 
@@ -293,4 +295,16 @@ avg_wc_pct <- mean(wc_df$Percent.Working.Capital[i_start:i_end])
 print(paste("3-Year Average Working Capital Percentage of revenue: ",
             signif(avg_wc_pct * 100, 3)))
 
+ERP <- 7
+future_years  <- seq(wsj_df$Year[length(wsj_df$Year)] + 1, length.out = ERP)
+projected_revenue <- cumprod(c(wsj_df$`Sales/Revenue`[5], rep((1+cagr), ERP)))[2:(ERP + 1)]
+
+incremental_wc_df <- data.frame(
+  Year = future_years,
+  Revenue = projected_revenue
+  )
+incremental_wc_df$`Incremental Revenue`[2:ERP] <- diff(projected_revenue)
+incremental_wc_df$incremental_wc <- avg_wc_pct * incremental_wc_df$`Incremental Revenue`
+#
+incremental_wc_df
 ```
