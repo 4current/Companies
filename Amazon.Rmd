@@ -217,7 +217,7 @@ rownames(nopat_table) <- future_years
 nopat_table
 ```
 
-## Investment and Depreciatiob Costs
+## Investment and Depreciation Costs
 ```{r}
 
 wsj_cf_df <- wsj_table_clean_format(
@@ -226,4 +226,71 @@ wsj_cf_df <- wsj_table_clean_format(
 wsj_cf_df
 
 ```
+```{r}
+# Net Investment
 
+year <- wsj_cf_df$Year
+
+net_investment_df <- data.frame(
+  Year = wsj_cf_df$Year,
+  NewInvestment = -(wsj_cf_df$`Capital Expenditures` + wsj_cf_df$`Net Assets from Acquisitions` + wsj_cf_df$`Sale of Fixed Assets & Businesses` + wsj_cf_df$`Purchase of Investments` + wsj_cf_df$`Sale/Maturity of Investments`),
+  PercentNewInvestment = NewInvestment / wsj_df$`Sales/Revenue`,
+  DepreciationExpense = wsj_df$`Depreciation & Amortization Expense`,
+  PercentDepreciation = DepreciationExpense / wsj_df$`Sales/Revenue`,
+  NetInvestment = NewInvestment - DepreciationExpense 
+)
+
+net_investment_df
+
+avg_period <- 3
+i_end <- length(net_investment_df$Year)
+i_start <- i_end - avg_period + 1
+avg_deprecn_pct <- mean(net_investment_df$PercentDepreciation[i_start:i_end])
+avg_invest_pct <- mean(net_investment_df$PercentNewInvestment[i_start:i_end])
+
+print(paste("3-Year Average Depreciation Percentage: ", signif(avg_deprecn_pct * 100, 3)))
+print(paste("3-Year Average Investment Percentage: ", signif(avg_invest_pct * 100, 3)))
+
+ERP <- 7
+future_years  <- seq(wsj_df$Year[length(wsj_df$Year)] + 1, length.out = ERP)
+projected_revenue <- cumprod(c(wsj_df$`Sales/Revenue`[5], rep((1+cagr), ERP)))[2:(ERP + 1)]
+
+
+projected_net_investment_df <- data.frame(
+  Year = future_years,
+  Revenue = projected_revenue,
+  `New Investment` = projected_revenue * avg_invest_pct,
+  Depreciation = projected_revenue * avg_deprecn_pct,
+  `Net Investment` = projected_revenue * avg_invest_pct - projected_revenue * avg_deprecn_pct
+)
+
+projected_net_investment_df
+
+```
+```{r}
+# Working Capital
+
+wc <- -(wsj_cf_df$Receivables + wsj_cf_df$Inventories + wsj_cf_df$`Accounts Payable`)
+pct_wc <- wc / wsj_df$`Sales/Revenue`
+
+wc_df <- data.frame(
+  Year = wsj_df$Year, 
+  Revenue = wsj_df$`Sales/Revenue`,
+  `Accounts Receivable` = wsj_cf_df$Receivables,
+  Inventory = wsj_cf_df$Inventories,
+  `Accounts Payable` = wsj_cf_df$`Accounts Payable`,
+  `Working Capital` = wc,
+  `Percent Working Capital` = pct_wc
+)
+
+wc_df
+
+avg_period <- 3
+i_end <- length(wc_df$Year)
+i_start <- i_end - avg_period + 1
+avg_wc_pct <- mean(wc_df$Percent.Working.Capital[i_start:i_end])
+
+print(paste("3-Year Average Working Capital Percentage of revenue: ",
+            signif(avg_wc_pct * 100, 3)))
+
+```
